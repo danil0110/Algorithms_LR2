@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Algorithms_LR2
 {
@@ -8,14 +9,28 @@ namespace Algorithms_LR2
         {
             Graph g = new Graph();
             g.GraphOutput();
+            Console.WriteLine();
+            g.GreedyColoring();
         }
     }
 
     class Graph
     {
-        private const int vertices = 20;
+        private const int vertices = 6;
         private int[,] graph;
         private int[] degree;
+        private int recordChromeNumber;
+        private int recordIteration;
+
+        private string[] AllColors =
+        {
+            "Красный", "Зеленый", "Голубой", "Желтый", "Фиолетовый",
+            "Оранжевый", "Лаймовый", "Синий", "Черный", "Белый",
+            "Коричневый", "Небесный", "Абрикосовый", "Аметистовый", "Алый",
+            "Бежевый", "Пурпурный", "Болотный", "Бронзовый", "Серебряный",
+            "Индиго", "Маджента", "Люминесцентный", "Медовый", "Фуксия",
+            "Мятный", "Ниагара", "Нефритовый", "Оливковый", "Охра"
+        };
 
         public Graph()
         {
@@ -55,6 +70,54 @@ namespace Algorithms_LR2
             }
         }
 
+        public void GreedyColoring()
+        {
+            List<string> usedColors = new List<string>();
+            string[] verticesColors = new string[vertices];
+            for (int i = 0; i < vertices; i++)
+            {
+                for (int j = 0; j < AllColors.Length; j++)
+                {
+                    if (isAvailableColor(i, AllColors[j], verticesColors))
+                    {
+                        verticesColors[i] = AllColors[j];
+                        if (!usedColors.Contains(AllColors[j]))
+                        {
+                            usedColors.Add(AllColors[j]);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            recordIteration = 1;
+            recordChromeNumber = usedColors.Count;
+
+            Console.WriteLine($"Хроматическое число - {recordChromeNumber}");
+            for (int i = 0; i < vertices; i++)
+            {
+                Console.WriteLine($"{i + 1} - {verticesColors[i]}");
+            }
+            
+        }
+
+        private bool isAvailableColor(int vertex, string color, string[] verticesColors)
+        {
+            for (int i = 0; i < vertices; i++)
+            {
+                if (graph[vertex, i] == 1)
+                {
+                    if (color == verticesColors[i])
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+        
         public void GraphOutput()
         {
             for (int i = 0; i < vertices; i++)

@@ -9,9 +9,11 @@ namespace Algorithms_LR2
         public static void Main(string[] args)
         {
             Graph g = new Graph();
-            Console.WriteLine();
             g.GreedyColoring();
-            g.BeeColoringABC();
+            for (int i = 0; i < 10000; i++)
+            {
+                g.BeeColoringABC(i);
+            }
         }
     }
 
@@ -104,135 +106,131 @@ namespace Algorithms_LR2
             Console.WriteLine();
         }
 
-        public void BeeColoringABC()
+        public void BeeColoringABC(int iteration)
         {
             Random rng = new Random();
             int[] scouts = new int[3];
             int[] workers = new int[3];
 
-            for (int k = 0; k < 1000; k++)
+            List<int> notVisitedVertices = InitVerticesArray();
+            List<string> usedColors = new List<string>();
+            bool[] coloredVertices = new bool[vertices];
+            string[] verticesColors = new string[vertices];
+                
+            while (!IsAllVerticesColored(coloredVertices))
             {
-                List<int> notVisitedVertices = InitVerticesArray();
-                List<string> usedColors = new List<string>();
-                bool[] coloredVertices = new bool[vertices];
-                string[] verticesColors = new string[vertices];
-                
-                while (!IsAllVerticesColored(coloredVertices))
+                bool[] chosen = new bool[vertices];
+                int degreeSum = 0;
+                for (int i = 0; i < 3; i++)
                 {
-                    bool[] chosen = new bool[vertices];
-                    int degreeSum = 0;
-                    for (int i = 0; i < 3; i++)
+                    scouts[i] = notVisitedVertices[rng.Next(0, notVisitedVertices.Count)];
+                    chosen[scouts[i]] = true;
+                    notVisitedVertices.Remove(scouts[i]);
+                    degreeSum += degree[scouts[i]];
+                }
+
+                workers[0] = 22 * degree[scouts[0]] / degreeSum;
+                workers[1] = 22 * degree[scouts[1]] / degreeSum;
+                workers[2] = 22 - workers[0] - workers[1];
+
+                for (int i = 0; i < 3; i++)
+                {
+                    string tempColor = verticesColors[scouts[i]];
+                    verticesColors[scouts[i]] = "";
+                    if (!IsAnyVertexColored(tempColor, verticesColors))
                     {
-                        scouts[i] = notVisitedVertices[rng.Next(0, notVisitedVertices.Count)];
-                        chosen[scouts[i]] = true;
-                        notVisitedVertices.Remove(scouts[i]);
-                        degreeSum += degree[scouts[i]];
+                        usedColors.Remove(tempColor);
                     }
-
-                    workers[0] = 22 * degree[scouts[0]] / degreeSum;
-                    workers[1] = 22 * degree[scouts[1]] / degreeSum;
-                    workers[2] = 22 - workers[0] - workers[1];
-
-                    for (int i = 0; i < 3; i++)
-                    {
-                        string tempColor = verticesColors[scouts[i]];
-                        verticesColors[scouts[i]] = "";
-                        if (!IsAnyVertexColored(tempColor, verticesColors))
-                        {
-                            usedColors.Remove(tempColor);
-                        }
                     
-                        for (int j = 0; j < vertices; j++)
+                    for (int j = 0; j < vertices; j++)
+                    {
+                        if (workers[i] == 1)
                         {
-                            if (workers[i] == 1)
-                            {
-                                break;
-                            }
+                            break;
+                        }
                         
-                            if (graph[scouts[i], j] == 1 && !chosen[j])
+                        if (graph[scouts[i], j] == 1 && !chosen[j])
+                        {
+                            bool coloringCompleted = false;
+                            foreach (var el in usedColors)
                             {
-                                bool coloringCompleted = false;
-                                foreach (var el in usedColors)
+                                if (IsAvailableColor(j, el, verticesColors))
                                 {
-                                    if (IsAvailableColor(j, el, verticesColors))
+                                    tempColor = verticesColors[j];
+                                    verticesColors[j] = el;
+                                    if (!IsAnyVertexColored(tempColor, verticesColors))
                                     {
-                                        tempColor = verticesColors[j];
-                                        verticesColors[j] = el;
-                                        if (!IsAnyVertexColored(tempColor, verticesColors))
-                                        {
-                                            usedColors.Remove(tempColor);
-                                        }
-
-                                        coloredVertices[j] = true;
-                                        coloringCompleted = true;
-                                        workers[i]--;
-                                        break;
-                                    }
-                                }
-
-                                if (!coloringCompleted)
-                                {
-                                    string color = AllColors[rng.Next(0, 30)];
-                                    while (usedColors.Contains(color))
-                                    {
-                                        color = AllColors[rng.Next(0, 30)];
+                                        usedColors.Remove(tempColor);
                                     }
 
-                                    verticesColors[j] = color;
                                     coloredVertices[j] = true;
-                                    usedColors.Add(color);
+                                    coloringCompleted = true;
                                     workers[i]--;
+                                    break;
                                 }
-                                
                             }
-                        }
-                        
-                        foreach (var el in usedColors)
-                        {
-                            if (IsAvailableColor(scouts[i], el, verticesColors))
+
+                            if (!coloringCompleted)
                             {
-                                verticesColors[scouts[i]] = el;
-                                coloredVertices[scouts[i]] = true;
+                                string color = AllColors[rng.Next(0, 30)];
+                                while (usedColors.Contains(color))
+                                {
+                                    color = AllColors[rng.Next(0, 30)];
+                                }
+
+                                verticesColors[j] = color;
+                                coloredVertices[j] = true;
+                                usedColors.Add(color);
                                 workers[i]--;
-                                break;
                             }
+                                
                         }
-
-                        if (verticesColors[scouts[i]] == "")
-                        {
-                            string newColor = AllColors[rng.Next(0, 30)];
-                            while (usedColors.Contains(newColor))
-                            {
-                                newColor = AllColors[rng.Next(0, 30)];
-                            }
-
-                            verticesColors[scouts[i]] = newColor;
-                            coloredVertices[scouts[i]] = true;
-                            usedColors.Add(newColor);
-                            workers[i]--;
-                        }
-                    
                     }
-
-                }
-
-                if (usedColors.Count < recordChromeNumber || recordChromeNumber == 0)
-                {
-                    recordChromeNumber = usedColors.Count;
-                    recordIteration = k + 1;
-                    Console.WriteLine("--- РЕКОРД ---");
-                    Console.WriteLine($"Хроматическое число - {recordChromeNumber}");
-                    Console.WriteLine($"Номер итерации - {recordIteration}");
-                    Console.WriteLine("Рекордная раскраска:");
-                    for (int i = 0; i < vertices; i++)
+                        
+                    foreach (var el in usedColors)
                     {
-                        Console.WriteLine($"{i + 1} - {verticesColors[i]}");
+                        if (IsAvailableColor(scouts[i], el, verticesColors))
+                        {
+                            verticesColors[scouts[i]] = el;
+                            coloredVertices[scouts[i]] = true;
+                            workers[i]--;
+                            break;
+                        }
                     }
-                    Console.WriteLine();
+
+                    if (verticesColors[scouts[i]] == "")
+                    {
+                        string newColor = AllColors[rng.Next(0, 30)];
+                        while (usedColors.Contains(newColor))
+                        {
+                            newColor = AllColors[rng.Next(0, 30)];
+                        }
+
+                        verticesColors[scouts[i]] = newColor;
+                        coloredVertices[scouts[i]] = true;
+                        usedColors.Add(newColor);
+                        workers[i]--;
+                    }
+                    
                 }
-                
+
             }
-            
+
+            if (usedColors.Count < recordChromeNumber || recordChromeNumber == 0)
+            {
+                recordChromeNumber = usedColors.Count;
+                recordIteration = iteration + 1;
+                Console.WriteLine("--- РЕКОРД ---");
+                Console.WriteLine($"Хроматическое число - {recordChromeNumber}");
+                Console.WriteLine($"Номер итерации - {recordIteration}");
+                Console.WriteLine("Рекордная раскраска:");
+                for (int i = 0; i < vertices; i++)
+                {
+                    Console.WriteLine($"{i + 1} - {verticesColors[i]}");
+                }
+                Console.WriteLine();
+            }
+                
         }
 
         private List<int> InitVerticesArray()

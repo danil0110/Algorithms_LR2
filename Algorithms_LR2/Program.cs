@@ -20,12 +20,12 @@ namespace Algorithms_LR2
     class Graph
     {
         private const int vertices = 150;
-        private int[,] graph;
-        private int[] degree;
-        private int recordChromeNumber;
-        private int recordIteration;
+        private int[,] graph; // Матрица смежности
+        private int[] degree; // Степени вершин графа
+        private int recordChromeNumber; // Рекордное хроматическое число
+        private int recordIteration; // Номер рекордной итерации
 
-        private string[] AllColors =
+        private string[] AllColors = // Палитра цветов
         {
             "Красный", "Зеленый", "Голубой", "Желтый", "Фиолетовый",
             "Оранжевый", "Лаймовый", "Синий", "Черный", "Белый",
@@ -42,6 +42,7 @@ namespace Algorithms_LR2
             GraphGenerate();
         }
 
+        // Генерация графа
         private void GraphGenerate()
         {
             Random rng = new Random();
@@ -73,6 +74,7 @@ namespace Algorithms_LR2
             }
         }
 
+        // Жадная раскраска графа
         public void GreedyColoring()
         {
             List<string> usedColors = new List<string>();
@@ -106,21 +108,24 @@ namespace Algorithms_LR2
             Console.WriteLine();
         }
 
+        // Раскраска пчелиным алгоритмом ABC
         public void BeeColoringABC(int iteration)
         {
             Random rng = new Random();
-            int[] scouts = new int[3];
-            int[] workers = new int[3];
+            int[] scouts = new int[3]; // Выбранные вершины для каждого разведчика
+            int[] workers = new int[3]; // Количество фуражиров на каждую вершину
 
-            List<int> notVisitedVertices = InitVerticesArray();
-            List<string> usedColors = new List<string>();
-            bool[] coloredVertices = new bool[vertices];
-            string[] verticesColors = new string[vertices];
+            List<int> notVisitedVertices = InitVerticesArray(); // Список всех вершин
+            List<string> usedColors = new List<string>(); // Список использованных цветов
+            bool[] coloredVertices = new bool[vertices]; // Массив вершин (закрашена || незакрашена)
+            string[] verticesColors = new string[vertices]; // Цвет каждой закрашеной вершины
                 
             while (!IsAllVerticesColored(coloredVertices))
             {
-                bool[] chosen = new bool[vertices];
-                int degreeSum = 0;
+                bool[] chosen = new bool[vertices]; // Массив для пометки выбранных вершин
+                int degreeSum = 0; // Сумма степеней выбранных вершин
+                
+                // Выбор разведчиками случайных непосещенных вершин 
                 for (int i = 0; i < 3; i++)
                 {
                     scouts[i] = notVisitedVertices[rng.Next(0, notVisitedVertices.Count)];
@@ -129,14 +134,18 @@ namespace Algorithms_LR2
                     degreeSum += degree[scouts[i]];
                 }
 
+                // Распределение фуражиров на каждую вершину
                 workers[0] = 22 * degree[scouts[0]] / degreeSum;
                 workers[1] = 22 * degree[scouts[1]] / degreeSum;
                 workers[2] = 22 - workers[0] - workers[1];
 
                 for (int i = 0; i < 3; i++)
                 {
+                    // Удаление цвета с выбранной вершины
                     string tempColor = verticesColors[scouts[i]];
                     verticesColors[scouts[i]] = "";
+                    // Если никакая другая вершина не закрашена в удаленный цвет - удалить
+                    // из списка использованных цветов
                     if (!IsAnyVertexColored(tempColor, verticesColors))
                     {
                         usedColors.Remove(tempColor);
@@ -144,16 +153,18 @@ namespace Algorithms_LR2
                     
                     for (int j = 0; j < vertices; j++)
                     {
-                        if (workers[i] == 1)
+                        if (workers[i] == 1) // Выделение одного фуражира на покраску выбранной вершины
                         {
                             break;
                         }
                         
+                        // Если вершина смежная и не выбрана другим разведчиком - красим
                         if (graph[scouts[i], j] == 1 && !chosen[j])
                         {
                             bool coloringCompleted = false;
                             foreach (var el in usedColors)
                             {
+                                // Поиск допустимого цвета среди использованных
                                 if (IsAvailableColor(j, el, verticesColors))
                                 {
                                     tempColor = verticesColors[j];
@@ -170,6 +181,7 @@ namespace Algorithms_LR2
                                 }
                             }
 
+                            // Выбор нового случайного цвета из палитры цветов
                             if (!coloringCompleted)
                             {
                                 string color = AllColors[rng.Next(0, 30)];
@@ -186,7 +198,9 @@ namespace Algorithms_LR2
                                 
                         }
                     }
-                        
+                    
+                    // Раскраска выбранной вершины
+                    // Поиск допустимого цвета среди использованных
                     foreach (var el in usedColors)
                     {
                         if (IsAvailableColor(scouts[i], el, verticesColors))
@@ -198,6 +212,7 @@ namespace Algorithms_LR2
                         }
                     }
 
+                    // Выбор нового случайного цвета из палитры цветов
                     if (verticesColors[scouts[i]] == "")
                     {
                         string newColor = AllColors[rng.Next(0, 30)];
@@ -216,6 +231,7 @@ namespace Algorithms_LR2
 
             }
 
+            // Сравнение текущего результата с наилучшим
             if (usedColors.Count < recordChromeNumber || recordChromeNumber == 0)
             {
                 recordChromeNumber = usedColors.Count;
@@ -233,6 +249,7 @@ namespace Algorithms_LR2
                 
         }
 
+        // Инициализация списка всех вершин
         private List<int> InitVerticesArray()
         {
             List<int> array = new List<int>();
@@ -244,6 +261,7 @@ namespace Algorithms_LR2
             return array;
         }
 
+        // Доступен ли данный цвет для покраски данной вершины
         private bool IsAvailableColor(int vertex, string color, string[] verticesColors)
         {
             for (int i = 0; i < vertices; i++)
@@ -260,6 +278,7 @@ namespace Algorithms_LR2
             return true;
         }
 
+        // Проверка все ли вершины закрашены
         private bool IsAllVerticesColored(bool[] array)
         {
             foreach (var el in array)
@@ -273,6 +292,7 @@ namespace Algorithms_LR2
             return true;
         }
 
+        // Имеет ли данный цвет какая-либо вершина
         private bool IsAnyVertexColored(string color, string[] verticesColors)
         {
             foreach (var el in verticesColors)
@@ -286,6 +306,7 @@ namespace Algorithms_LR2
             return false;
         }
         
+        // Вывод матрицы смежности графа
         public void GraphOutput()
         {
             for (int i = 0; i < vertices; i++)

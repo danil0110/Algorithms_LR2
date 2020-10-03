@@ -42,38 +42,6 @@ namespace Algorithms_LR2
             GraphGenerate();
         }
 
-        // Генерация графа
-        private void GraphGenerate()
-        {
-            Random rng = new Random();
-            for (int i = 0; i < vertices; i++)
-            {
-                int times = vertices;
-                int[] visited = new int[vertices];
-                visited[i] = 1;
-
-                int DEG = rng.Next(1, 31);
-                while (degree[i] < DEG && times > 0)
-                {
-                    int val = rng.Next(vertices);
-                    int deg = rng.Next(30);
-                    if (i != val && degree[val] < deg)
-                    {
-                        if (visited[val] == 0)
-                        {
-                            degree[val]++;
-                            degree[i]++;
-                            graph[i, val] = 1;
-                            graph[val, i] = 1;
-                            visited[val] = 1;
-                        }
-                    }
-
-                    times--;
-                }
-            }
-        }
-
         // Жадная раскраска графа
         public void GreedyColoring()
         {
@@ -304,6 +272,38 @@ namespace Algorithms_LR2
             }
 
             return false;
+        }
+        
+        // Генерация графа
+        private void GraphGenerate()
+        {
+            Random rng = new Random();
+            for (int i = 0; i < vertices; i++)
+            {
+                int times = vertices;
+                int[] visited = new int[vertices];
+                visited[i] = 1;
+
+                int DEG = rng.Next(1, 31);
+                while (degree[i] < DEG && times > 0)
+                {
+                    int val = rng.Next(vertices);
+                    int deg = rng.Next(30);
+                    if (i != val && degree[val] < deg)
+                    {
+                        if (visited[val] == 0)
+                        {
+                            degree[val]++;
+                            degree[i]++;
+                            graph[i, val] = 1;
+                            graph[val, i] = 1;
+                            visited[val] = 1;
+                        }
+                    }
+
+                    times--;
+                }
+            }
         }
         
         // Вывод матрицы смежности графа

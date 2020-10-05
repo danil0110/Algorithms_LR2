@@ -9,7 +9,7 @@ namespace Algorithms_LR2
         {
             Graph g = new Graph();
             g.GreedyColoring();
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i <= 2000; i++)
             {
                 g.BeeColoringABC(i);
             }
@@ -65,8 +65,7 @@ namespace Algorithms_LR2
 
             recordIteration = 1;
             recordChromeNumber = usedColors.Count;
-
-            Console.WriteLine("Раскраска жадным алгоритмом");
+            
             Console.WriteLine($"Хроматическое число - {recordChromeNumber}");
             for (int i = 0; i < vertices; i++)
             {
@@ -212,6 +211,9 @@ namespace Algorithms_LR2
                     Console.WriteLine($"{i + 1} - {verticesColors[i]}");
                 }
                 Console.WriteLine();
+            } else if (iteration % 20 == 0)
+            {
+                Console.WriteLine($"Лучшее хроматическое число на {iteration} итерации - {recordChromeNumber}");
             }
                 
         }
